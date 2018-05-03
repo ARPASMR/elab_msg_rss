@@ -1,0 +1,80 @@
+Compile xrit2pic for Windows.
+This readme describes how to compile xrit2pic for Windows:
+. non-gui mode
+. gui mode (needs gtk libraries)
+
+Note that xrit2pic gui mode has a -nongui option, but then you need the 
+graphical gtk environment (libraries) anyway. 
+Compilation for non-gui doesn't need these libraries.
+
+
+Non-gui (commandline):
+. You need gcc and make for Windows.
+
+With gui:
+. You need gcc and make for Windows, and gtk for windows.
+
+
+There are 2 special dynamically linked libraries necessary: 
+for jpeg and for wavelet decompression.
+
+You can use the precompiled jpeg library, or compile it yourself.
+
+You need the precompiled wavelet library. 
+(Source code of Wavelet is only available via Eumetsat.)
+
+1. For both non-gui and gui mode; use pre-compiled decompress libs
+
+To compile you need (see website: http://www.alblas.demon.nl/wsat/software)
+. xrit2pic_src.zip 
+. decompr_winlnlib.zip
+
+
+Use command shell to do the compile.
+For unzipping you may also use winzip.
+
+. Create a directory, put the 2 zip files into this dir.
+. Unzip (or use winzip):
+    unzip xrit2pic_src.zip
+    unzip decompr_winlnlib.zip
+
+You should now have the following directories:
+xrit/wvt
+jpeg812
+
+
+Now choose if you want no_gui or gui mode.
+
+NOTE: Don't switch compilation from one mode to the other without doing a clean:
+
+make -f xritwin.mk clean
+
+1.1. Compile Non-gui mode.
+
+Unpack:
+make -f xritwin.mk unpack_nogui
+
+Compile:
+make -f xritwin.mk comp_nogui
+
+The result xrit2pic.exe is in the xrit directory. 
+
+
+1.2. Compile Gui-mode.
+Unpack:
+make -f xritwin.mk unpack_gui
+
+Compile:
+make -f xritwin.mk comp_gui
+
+The result xrit2pic.exe is in the xrit directory. 
+
+1.3. Installation.
+In addition you need dll's from:
+setup_decompr.exe
+This is a self-extracting installation.
+
+Easiest is to install xrit2pic.exe together with the dll's 
+from setup_decompr.exe into 1 directory.
+
+

@@ -1,0 +1,151 @@
+# vim: set ts=2 sw=2 et
+
+function crealog  {
+
+	NOME_LOG=`date +"%Y%m%d"`
+	FILE_LOG=/home/radar/operativo/log/$1_$NOME_LOG.log
+
+	echo $FILE_LOG
+
+	echo  "===============================================================" >> $FILE_LOG
+
+}
+
+function scrlog {
+
+	if [ -z $1 ]; then
+	    printf " Procedura %s\n" $FNCNAME
+	    printf " ATTENZIONE: Il parametro deve sempre essere specificato\n"
+	  fi
+	  LogFileName=$1
+  
+	  THISHOUR=`date '+%H:%M:%S'`
+	  echo $THISHOUR " " $2 " " $3  >> $LogFileName
+}
+
+function crea_lock {
+
+	if [[ -a /tmp/$1.lock ]]
+		then
+		echo "esco dal programma per lock elaborazioni" 
+		exit
+	else
+		touch /tmp/$1.lock
+	fi
+
+}
+
+function rimuovi_lock {
+
+	if [[ -a /tmp/$1.lock ]]
+	  then
+		echo $FILE_LOG "RIMOZIONE DEL LOCK" 
+		rm /tmp/$1.lock
+	fi
+
+}
+
+function LeapCheck {
+
+	if (( $1 % 4 ))
+	then
+		Days=365
+	else
+		if (( $1 % 1000 ))
+		then
+			if (( $1 % 100 ))
+			then
+				Days=366
+			else
+				(( Result = $1 / 100 ))
+				if (( $Result % 2 ))
+				then
+					Days=365
+				else
+					Days=366
+				fi
+			fi
+		else
+			(( Result = $1 / 1000 ))
+			if (( $Result %2 ))
+			then
+				Days=365
+			else
+				Days=366
+			fi
+		fi
+	fi
+
+}
+
+function getDate {
+
+	integer counter=1 cntDays total
+
+	while [ $counter -lt $1 ]
+	do
+
+		case $counter in
+	
+			1|3|5|7|8|10|12 ) cntDays=31
+			;;
+			2 ) if [ $Days = 365 ]
+				then
+					cntDays=28
+				else
+					cntDays=29
+				fi
+			;;
+			* ) cntDays=30
+			;;
+		esac
+		(( total=total+cntDays ))
+		(( counter += 1 ))
+	done
+
+	case $2 in
+
+		29 ) if [ $1 -eq 2 ] && [ $Days -eq 365 ]
+			then
+				Message="February 29th is invalid for a non leap year"
+				usage
+			fi
+		;;
+		31 ) case $1 in
+					2|4|6|9|11 ) Message="The 31st is invalid for February,April, June, September or November"
+					usage
+					;;
+				esac
+		;;
+		30 ) if [ $1 -eq 2 ]
+			then
+				Message="February 30 is invalid"
+				usage
+			fi
+		;;
+	esac
+
+	(( total=total+$2 ))
+	#print "The julian date is $total"
+
+	julian=$total
+
+	if [ $total -lt 100 ]
+	then
+		julian='0'$total
+	fi
+
+	if [ $total -lt 10 ]
+	then
+		julian='00'$total
+	fi
+
+}
+
+function usage {
+
+	print "$Message"
+	exit 1
+
+}
+

@@ -1,0 +1,50 @@
+0.2.5 (F. Ducos, 1 Feb 2011)
+update of the link to the MSG Data Description Format Guide
+(changed on the EUMETSAT web site)
+
+0.2.4 (F. Ducos, 27 Feb 2010)
+port on Windows/Cygwin
+read_xrit.c: argument b (binary) added to fopen (needed on Windows)
+             call to alloca replaced by the pair malloc/free
+	     (alloca crashes on Cygwin 1.7.1, at least on my XP system)
+
+0.2.3 (F. Ducos)
+new auxiliary tool put_xrit_segments_together.pl
+
+0.2.[12] (F. Ducos)
+internal versions, not diffused
+
+0.2.0 (F. Ducos)
+read_xrit.c: fixed a compilation bug with CHAR_BIT: <limits.h> included
+read_xrit_header.c: fixed a compilation bug with CHAR_BIT: <limits.h> included
+
+0.1.9 (F. Ducos)
+read_xrit.h:72:
+replacement of arrays by pointers in the xrit_rows_infos_struct (to allow dynamic allocation) ! DON'T FORGET TO FREE THE POINTERS AFTER CALL OF read_xrit
+read_xrit.c:158:
+dynamic allocation of rows_infos pointer fields (to process the HRV channel in the same way as others)
+read_xrit.c:407:
+replacement of magic number 8 by _last_segment + 1
+
+0.1.6 (F. Ducos)
+read_xrit.c:211:
+removal of an assert on tai_day (replaced by an execution warning if XRIT_DEBUG is defined)
+read_xrit.c:262:
+removal of an assert on tai_day (replaced by an execution warning if XRIT_DEBUG is defined)
+
+0.1.5 (F. Ducos)
+read_xrit.c:255:
+_xrit_orientation incorrectly set to XRIT_SOUTH_AT_TOP
+replaced by XRIT_NORTH_AT_TOP
+
+0.1.4 (F. Ducos)
+new utility program: read_seviri_prologue.c
+
+0.1.3 (F. Ducos)
+Misplaced 'packed' attributes have been fixed
+
+0.1.2 (F. Ducos)
+Misplaced 'packed' attributes in src/libmsg_gp_types.h:
+src/libmsg_gp_types.h:84: warning: `packed' attribute ignored
+src/libmsg_gp_types.h:87: warning: `packed' attribute ignored
+src/libmsg_gp_types.h:90: warning: `packed' attribute ignored

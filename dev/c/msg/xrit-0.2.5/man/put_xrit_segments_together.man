@@ -1,0 +1,92 @@
+.TH PUT_XRIT_SEGMENTS_TOGETHER.PL 1
+.SH NAME
+put_xrit_segments_together.pl \- gathers \fIHRIT\fP MSG segments broadcast by antenna (HRIT = High Rate Information Transmission Format) into \fBHRIT CYCLE\fP files containing a full image of the data
+.SH DOWNLOAD
+http://www-loa.univ-lille1.fr/~ducos/public/xrit/xrit-0.2.5.tar.gz
+.SH RELATED PAGES
+http://www-loa.univ-lille1.fr/~ducos/public/xrit/xrit2raw.html
+
+.SH REQUIREMENTS
+The tool should work on any Unix or Unix-like system with perl installed. \fBThe EUMETSAT decompression tool for HRIT data, xRITDecompress, must be
+installed in the PATH of the system.\fP
+(xRITDecompress is licensed but free of charge at the time of this writing, it can be acquired at http://www.eumetsat.int/Home/Main/Access_to_Data/User_Support/SP_1117714787347?l=en )
+.SH SYNOPSIS
+.B put_xrit_segments_together.pl [OPTIONS] \fIHRIT_PROLOGUE_FILE\fP [\fICHANNEL1 CHANNEL2 ...\fP]
+.SH DESCRIPTION
+.PP
+
+.PP
+The \fBMSG\fP data received from antenna (\fIHRIT\fP format) are split into segments of 464 rows for transmission purpose
+(8 for low resolution channels,24 for the High Resolution Visible).
+This tool puts them together to build a single file, that can be given in input
+to a tool like \fBxrit2raw\fP, which converts the data in a raw array of values, without header, easily readable in C, Fortran
+or any other tool that can read raw binary values, such as \fBMsphinx\fP, a raw data viewer ( http://www-loa.univ-lille1.fr/Msphinx/ )
+
+.PP
+The first argument is the path to a \fIHRIT_PROLOGUE_FILE\fP.
+The next ones are channels to build from segments (there can be several channels). The segment and epilogue files must
+be in the same directory as the prologue.
+If no \fICHANNEL\fP is specified, all the available channels will be processed.
+Valid values for \fICHANNELS\fP: HRV IR_016 IR_039 IR_087 IR_097 IR_108 IR_120 IR_134 VIS006 VIS008 WV_062 WV_073
+
+.PP
+Example:
+
+Let's assume that the whole MSG data (prologue, segments, epilogue) are under directories like MSG_DATA/YYYYMMDDhhmm
+Then all you have to do to build the channel VIS006 (visible 0.6 micrometers) is:
+
+put_xrit_segments_together.pl /PATH/TO/MSG_DATA/200608011200/H-000-MSG1__-MSG1________-_________-PRO______-200608011200-__ VIS006
+
+This will create a file H-000-MSG1__-MSG1________-VIS006___-CYCLE____-200608011200-__ (in your current directory, unless you have
+specified the -D option) and you will then be able to extract the data with a data dumper such as xrit2raw
+( http://www-loa.univ-lille1.fr/~ducos/public/xrit/xrit2raw.html ).
+.PP
+To dump the data into a raw file (easy to read programmatically or without a raw data viewer, see the xrit2raw manpage), you can do :
+.PP
+xrit2raw -F -999. -v -f H-000-MSG1__-MSG1________-VIS006___-CYCLE____-200608011200-__
+.PP
+For more details on this command, see http://www-loa.univ-lille1.fr/~ducos/public/xrit/xrit2raw.html
+.SH OPTIONS
+.TP
+.B -C
+preserves the compatibility with the SATMOS naming convention and the old (now obsolete) ICARE catslot tool
+(removes the underscores in the channel names and the suffix -__ in the output file)
+.PP
+by default, the output name will be kept as close as possible to the EUMETSAT input names
+.PP
+without the -C option: H-000-MSG1__-MSG1________-IR_087___-CYCLE____-200608011200-__ (EUTMETSAT-like, the default)
+.PP
+with the -C option:    H-000-MSG1__-MSG1________-IR087____-CYCLE____-200608011200    (SATMOS-like)
+
+.TP
+.B -D \fItarget_directory\fP
+speficies the directory to which the output file will be written (the current one by default)
+
+
+.TP
+.B -v
+enables the verbose mode
+
+.SH COPYRIGHT
+\fBput_xrit_segments_together.pl\fP is Copyright (c) LOA/ICARE 2010
+.PP
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+.PP
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+.PP
+You should have received a copy of the GNU Lesser General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+.PP
+Please report any bug or issue you could find to fabrice.ducos@univ-lille1.fr
+.SH AUTHORS
+Fabrice Ducos
