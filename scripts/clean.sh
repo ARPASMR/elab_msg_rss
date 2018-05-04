@@ -24,7 +24,7 @@
 # ===============================================================================
 # CONFIGURAZIONE DELL'AMBIENTE
 #
-. /home/meteo/conf/default.conf
+. /conf/default.conf
 
 declare -x LANG="us_US.UTF-8"
 

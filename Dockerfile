@@ -2,6 +2,12 @@
 #FROM docker.io/r-base
 FROM docker.io/debian:stretch
 
+# Label this image
+# LABEL name="registry.arpa.local/processi/elab_msg_batch"
+LABEL name="elab_batch"
+LABEL version="1.0"
+LABEL description="image for radar process elab_msg_batch"
+
 ## Set a default user. Available via runtime flag `--user docker` 
 ## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
 ## User should also have & own a home directory (for rstudio or linked volumes to work properly). 
@@ -12,6 +18,7 @@ RUN useradd docker \
 
 RUN apt-get update \ 
 	&& apt-get install -y --no-install-recommends \
+                apt-utils \
 		ed \
 		less \
 		locales \
@@ -40,7 +47,6 @@ ENV R_BASE_VERSION 3.3.3
 RUN apt-get update \
 	#&& apt-get install -t unstable -y --no-install-recommends \
 	&& apt-get install -y --no-install-recommends \
-                apt-utils \
 		littler \
                 r-cran-littler \
 		r-base=${R_BASE_VERSION}* \
@@ -57,11 +63,6 @@ RUN apt-get update \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Il presente dockerfile potrebbe essere spezzato qui pre creare l'immagine intermedia r-base
-
-# Label this image
-LABEL name="registry.arpa.local/processi/elab_msg_batch"
-LABEL version="1.0"
-LABEL decription="image for radar process elab_msg_batch"
 
 # Install useful packages
 RUN apt-get update
@@ -92,6 +93,12 @@ COPY ./dev/c/cumulata /development/c/cumulata
 COPY ./dev/c/minutes /development/c/minutes
 COPY ./dev/c/minutes/src /development/c/minutes/src
 COPY ./scripts/install_lib.R /usr/local/src/myscripts/
+RUN mkdir -p /development/c/msg/xrit-0.2.5
+COPY ./dev/c/msg/xrit-0.2.5 /development/c/msg/xrit-0.2.5
+RUN mkdir -p /data/rss && mkdir -p /data/modelli
+RUN mkdir -p /data/msg/tmp && mkdir -p /data/msg/archive \
+      && mkdir -p /data/msg/imgs && mkdir -p /data/msg/europe \
+      && mkdir -p /data/msg/analisi_msg && mkdir -p /data/msg/input
 WORKDIR /usr/local/src/myscripts/
 RUN R -e "install.packages('RPostgreSQL', repos = 'http://cran.us.r-project.org')"
 RUN R -e "install.packages('lubridate', repos = 'http://cran.us.r-project.org')"
@@ -149,17 +156,31 @@ RUN cp /development/c/jpeg812_src/libjpeg812.so /lib
 COPY ./dev/c/decompr_64/libwvt.so /lib
 
 # Change directory to /development/c/xrit2pic/sgtk/sgtk_src and make
-RUN cd /development/c/xrit2pic/sgtk/sgtk_src && make
+RUN cd /development/c/xrit2pic/sgtk/sgtk_src && make 
+
+# Copy /development/c/msg/xrit-0.2.5/bin/put_xrit_segments_together.pl, 
+# /development/c/msg/bin/read_seviri_prologue,
+# /development/c/msg/bin/read_xrit_header,
+# /development/c/msg/bin/xrit2raw            to /bin
+RUN cp /development/c/msg/xrit-0.2.5/bin/put_xrit_segments_together.pl /bin \
+      && cp /development/c/msg/xrit-0.2.5/bin/read_seviri_prologue /bin \
+      && cp /development/c/msg/xrit-0.2.5/bin/read_xrit_header /bin \
+      && cp /development/c/msg/xrit-0.2.5/bin/xrit2raw /bin
+
+# Copy /development/c/msg/xrit-0.2.5/lib/libxrit.a to /lib
+RUN cp /development/c/msg/xrit-0.2.5/lib/libxrit.a /lib
 
 # Setup linker path
 RUN touch /etc/ld.so.conf.d/xrit2piclibs.conf && echo "/lib" > /etc/ld.so.conf.d/xrit2pic.conf && ldconfig
 
 # Change directory to /development/c/xrit2pic/xrit/main_src and make
-RUN cd /development/c/xrit2pic/xrit/main_src && make
+RUN cd /development/c/xrit2pic/xrit/main_src && make 
 
 # Copy /development/c/xrit2pic/xrit/main_src/xrit2pic to /bin
 RUN cp /development/c/xrit2pic/xrit/main_src/xrit2pic /bin
 
+# Change directory to /development/c/msg/xrit-0.2.5 && make clean && make
+RUN cd /development/c/msg/xrit-0.2.5 && make clean && make
 
 #RUN /bin/navig
 #RUN /bin/cumulata

@@ -9,22 +9,24 @@
 # CREATED....: 	Aprile 2011 (Cremonini)
 #
 #                  DATE                      DESCRIPTION
-# MODIFIED...: 
+# MODIFIED...:  Maggio 2018 (Paganotti)      Update for container development 
 #
 # -------------------------------------------------------------------------------
 # VERSION....: 	1.0 (05/04/2011)
+#               1.1 (04/05/2018)
 #
 # =======================================================================
 # REFERENCES..:
 #
 # Pellegrini:   	ARPA Lombardia
+# Paganotti:            Softech s.r.l.
 #
 #################################################################################
 #
 # ===============================================================================
 # CONFIGURAZIONE DELL'AMBIENTE
 #
-. /home/meteo/conf/default.conf
+. /conf/default.conf
 
 declare -x LANG="us_US.UTF-8"
 
@@ -32,11 +34,11 @@ declare -x LANG="us_US.UTF-8"
 # DEFINIZIONE DEI PERCORSI
 #
 
-MSGDIR_IN=/data/msg/input/
-MSGDIR_OT=/data/msg/tmp/
-MSGDIR_TAR=/data/msg/europe/
-MSGDIR_IMG=/data/msg/imgs/
-MSGDIR_ANALISI=/data/msg/analisi_msg
+MSGDIR_IN=$MSGDATADIR/input/
+MSGDIR_OT=$MSGDATADIR/tmp/
+MSGDIR_TAR=$MSGDATADIR/europe/
+MSGDIR_IMG=$MSGDATADIR/imgs/
+MSGDIR_ANALISI=$MSGDATADIR/analisi_msg
 
 export TMP=$MSGDIR_OT
 
@@ -60,7 +62,7 @@ nomefile_prologo=`find $MSGDIR_IN -name "*PRO*" | sort | tail -1`
 
 # Metto insieme tutti i segmenti
 
-/home/meteo/bin/put_xrit_segments_together.pl -v -D $MSGDIR_OT  $nomefile_prologo
+$BINDIR/put_xrit_segments_together.pl -v -D $MSGDIR_OT  $nomefile_prologo
 
 # Converto in formato binario piatto
 
@@ -78,7 +80,7 @@ do
 
 	/home/meteo/bin/xrit2raw -f -v $nomecycle $nomecycle".raw"
 
-	/home/meteo/bin/navig MSG2 H 42 48 5 14 0.006 $nomecycle".raw" $nomecycle
+	$BINDIR/navig MSG2 H 42 48 5 14 0.006 $nomecycle".raw" $nomecycle
 
 	rm $nomecycle $nomecycle".raw"
 
@@ -92,7 +94,7 @@ do
 
 	/home/meteo/bin/xrit2raw -f -v $nomecycle $nomecycle".raw"
 
-	/home/meteo/bin/navig MSG2 L 20 70 -30 30 0.04 $nomecycle".raw" $nomecycle
+	$BINDIR/navig MSG2 L 20 70 -30 30 0.04 $nomecycle".raw" $nomecycle
 
 	rm $nomecycle $nomecycle".raw"
 

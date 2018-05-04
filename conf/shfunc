@@ -1,9 +1,12 @@
 # vim: set ts=2 sw=2 et
+#
+
+LOGDIR=/var/log
 
 function crealog  {
 
 	NOME_LOG=`date +"%Y%m%d"`
-	FILE_LOG=/home/radar/operativo/log/$1_$NOME_LOG.log
+	FILE_LOG=$LOGDIR/$1_$NOME_LOG.log
 
 	echo $FILE_LOG
 
