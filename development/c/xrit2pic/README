@@ -1,0 +1,135 @@
+Compilation of xrit2pic is possible for Linux and Windows.
+Version 2008.08.
+
+To compile xrit2pic you need:
+
+1. The source files in this archive
+
+2. jpeg812 source files; see: (same for Linux and Windows)
+      http://www.alblas.demon.nl/wsat/software/files/jpeg812.zip
+
+
+3. Wavelet libraries; see for Linux:
+      http://www.alblas.demon.nl/wsat/software/files/decompr.tar.gz
+   Or for newer distributions (uses libstd++.so.6)
+      http://www.alblas.demon.nl/wsat/software/files/decompr6.tar.gz
+   Or for Windows:
+      http://www.alblas.demon.nl/wsat/software/files/win_libwvt.zip
+
+4. Compiler environment: for Linux:
+      gcc/g++
+      gtk libraries
+   or for Windows:
+      mingw environment
+      gtk for win32
+
+Note:
+. Instead of compiling jpeg812 you can also use for Linux the lib 
+  files in the decompr archives. But you need some header files to compile the
+  rest of the xrit2pic stuff! (These are present in the xrit2pic source files).
+  Change Makefile accordingly.
+
+. You don't need the Wavelet source files; download and use:
+    . For Linux: the runtime libwvt.so in decompr.tar.gz
+    . For Windows you need an extra file: libwvt.a in win_libwvt.zip
+
+  If you want source code of this part you need to contact Eumetsat. 
+  There is one extra file you need to compile together with the Wavelet files:
+    translate_wvt.cpp
+  This file is added: see dir. xrit/wvt.
+    
+
+Compilation.
+------------
+There are several modes to compile xrit2pic; flags are present in the makefile
+in dir. xrit:
+1. Choose operating system.
+   - OS="linux", "windows" or "solaris".
+
+   More OS's are possible (e.g. MAC);  change makefile accordingly.
+
+2. Choose GTK version
+
+  - GTK_REL="1.2": Use gtk 1.2. This is an older version of GTK, needed 
+                   for Windows and older Linux distributions.
+
+  - GTK_REL="2.0": Use gtk 2.0. For newer Linux distr. (Not tested on Windows!)
+
+  - GTK_REL="no":  Don't use gtk at all. 
+                   IMPORTANT: Make sure that the endian variable is set
+                   correctly! (Default: little endian)
+                   Usage is like xrit2pic -nogui. This doesn't use any special
+                   libs, so should be compilable on about any machine.
+                   You don't need the files in the sgtk directory.
+
+3. Choose Wavelet
+  - HAS_WVT="no"   Don't use Wavelet. Wavelet is only needed for HRIT and LRIT 
+                   foreign. E.g. ftp LRIT files are as far as I know all JPEG,
+                   so no Wavelet needed. Default: Do use.
+                   
+                   
+
+Next describes compilation under Linux.
+For Windows you need maybe to run winzip instead of the unzip command, 
+and gmake (gnu make) instead of make.
+
+Compile options.
+In both makefiles following choices are available:
+OS
+GTK_REL
+HAS_WVT
+See above to decide what to choose.
+
+Install source files as follows:
+ |
+ +---jpeg812/jpeg812.zip
+ |
+ |
+ + xrit2pic_src_all.zip
+
+Unzip jpeg812.zip:
+  $ cd jpeg812; unzip jpeg812.zip
+
+If you want to compile jpeg yourself:
+  $ make -f makefile.ansi
+
+This results in a libjpeg812.so (or jpeg812.dll), the same one as present 
+in decompr.tar.gz (or decompr.zip).
+
+Now go to the directory containing xrit2pic_src.zip and do:
+
+  $ unzip xrit2pic_src.zip
+  $ make unpack
+
+You should now have a sgtk dir. and a xrit dir. containg all the source 
+and make files.
+
+
+Check OS in makefiles in sgtk and xrit directories:
+for Linux:
+  OS="linux"
+for Windows:
+  OS="windows"
+
+For Linux make sure that libwvt.so is installed, e.g. in /usr/lib.
+
+For Windows make another directory:
+  $ cd xrit
+  $ mkdir wvt
+  $ cd wvt
+  $ mkdir v2
+
+Copy libwvt.a into directory xrit\wvt\v2.
+
+Now make xrit2pic:
+  $ make
+
+That's all!
+
+Compiled xrit2pic is in the xrit dir. 
+
+Install jpeg812 and wvt libraries as usual.
+
+
+
+

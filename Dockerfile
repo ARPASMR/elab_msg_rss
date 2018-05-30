@@ -1,11 +1,11 @@
 # Start from scratch
-#FROM docker.io/r-base
 FROM docker.io/debian:stretch
 
 # Label this image
 # LABEL name="registry.arpa.local/processi/elab_msg_batch"
 LABEL name="elab_batch"
 LABEL version="1.0"
+LABEL maintainer="Luca Paganotti <luca.paganotti@gmail.com>"
 LABEL description="image for radar process elab_msg_batch"
 
 ## Set a default user. Available via runtime flag `--user docker` 
@@ -62,44 +62,51 @@ RUN apt-get update \
 	&& rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Il presente dockerfile potrebbe essere spezzato qui pre creare l'immagine intermedia r-base
+# Il presente dockerfile potrebbe essere spezzato qui per creare l'immagine intermedia r-base
 
 # Install useful packages
 RUN apt-get update
-RUN apt-get install -y apt-utils
-RUN apt-get install -y curl
-RUN apt-get install -y openssl
-RUN apt-get install -y libssl-dev
-RUN apt-get install -y libcurl4-openssl-dev
-#RUN apt-get install -y libmysqlclient-dev
-RUN apt-get install -y libmariadb-dev-compat
-RUN apt-get install -y libmariadbclient-dev-compat
-RUN apt-get install -y libmysql++-dev
-RUN apt-get install -y libpq-dev
-RUN apt-get install -y ncftp
-RUN apt-get install -y ssh
-RUN apt-get install -y libgdal-dev
-RUN apt-get install -y rsync
-RUN apt-get install -y libgtk2.0-dev
+# RUN apt-get install -y apt-utils
+# RUN apt-get install -y curl
+# RUN apt-get install -y openssl
+# RUN apt-get install -y libssl-dev
+# RUN apt-get install -y libcurl4-openssl-dev
+# # RUN apt-get install -y libmysqlclient-dev
+# RUN apt-get install -y libmariadb-dev-compat
+# RUN apt-get install -y libmariadbclient-dev-compat
+# RUN apt-get install -y libmysql++-dev
+# RUN apt-get install -y libpq-dev
+# RUN apt-get install -y ncftp
+# RUN apt-get install -y ssh
+# RUN apt-get install -y libgdal-dev
+# RUN apt-get install -y rsync
+# RUN apt-get install -y libgtk2.0-dev
+
+RUN apt-get install -y apt-utils curl openssl libssl-dev libcurl4-openssl-dev libmariadbclient-dev-compat \
+      libmariadbclient-dev libmysql++-dev libpq-dev ncftp ssh libgdal-dev rsync libgtk2.0-dev libqt4-dev
 
 # Copy locally necessary files
-COPY ./scripts /scripts
-COPY ./conf /conf
-RUN mkdir -p /development/c/navig
-COPY ./dev /development
-COPY ./dev/c /development/c
-COPY ./dev/c/navig /development/c/navig
-COPY ./dev/c/cumulata /development/c/cumulata
-COPY ./dev/c/minutes /development/c/minutes
-COPY ./dev/c/minutes/src /development/c/minutes/src
+# COPY ./scripts /scripts
+# COPY ./conf /conf
+# RUN mkdir -p /development/c/navig
+# COPY ./dev /development
+# COPY ./dev/c /development/c
+# COPY ./dev/c/navig /development/c/navig
+# COPY ./dev/c/cumulata /development/c/cumulata
+# COPY ./dev/c/minutes /development/c/minutes
+# COPY ./dev/c/minutes/src /development/c/minutes/src
+# COPY ./scripts/install_lib.R /usr/local/src/myscripts/
+# RUN mkdir -p /development/c/msg/xrit-0.2.5
+# COPY ./dev/c/msg/xrit-0.2.5 /development/c/msg/xrit-0.2.5
+# RUN mkdir -p /data/rss && mkdir -p /data/modelli
+# RUN mkdir -p /data/msg/tmp && mkdir -p /data/msg/archive \
+#       && mkdir -p /data/msg/imgs && mkdir -p /data/msg/europe \
+#       && mkdir -p /data/msg/analisi_msg && mkdir -p /data/msg/input
+ADD ./elab_msg_batch.tar.xz /
 COPY ./scripts/install_lib.R /usr/local/src/myscripts/
-RUN mkdir -p /development/c/msg/xrit-0.2.5
-COPY ./dev/c/msg/xrit-0.2.5 /development/c/msg/xrit-0.2.5
-RUN mkdir -p /data/rss && mkdir -p /data/modelli
-RUN mkdir -p /data/msg/tmp && mkdir -p /data/msg/archive \
-      && mkdir -p /data/msg/imgs && mkdir -p /data/msg/europe \
-      && mkdir -p /data/msg/analisi_msg && mkdir -p /data/msg/input
 WORKDIR /usr/local/src/myscripts/
+
+# Install R packages
 RUN R -e "install.packages('RPostgreSQL', repos = 'http://cran.us.r-project.org')"
 RUN R -e "install.packages('lubridate', repos = 'http://cran.us.r-project.org')"
 RUN R -e "install.packages('jsonlite', repos = 'http://cran.us.r-project.org')"
@@ -114,73 +121,111 @@ RUN R -e "install.packages('RMySQL', repos = 'http://cran.us.r-project.org')"
 RUN R -e "install.packages('R2HTML', repos = 'http://cran.us.r-project.org')"
 
 # Update system
-RUN apt-get -y autoremove
-RUN apt-get -y update --fix-missing
-RUN apt-get -y upgrade --fix-missing
-RUN apt-get -y autoremove
-RUN apt-get -y dist-upgrade
-RUN apt-get -y autoremove
+RUN apt-get -y autoremove && \
+      apt-get -y update --fix-missing && \
+      apt-get -y upgrade --fix-missing && \
+      apt-get -y autoremove && \
+      apt-get -y dist-upgrade && \
+      apt-get -y autoremove
 
 # Must install Qt4/5
-RUN apt-get -y install libqt4-dev
+# RUN apt-get -y install libqt4-dev
 
-# Change directory to /development/c/navig
-# Build navig c executable
-RUN cd /development/c/navig && make
+#  1) Change directory to /development/c/navig
+#  2) Build navig c executable
+#  3) Copy executable file in /bin
+#  4) Change directory to /development/c/cumulata
+#  5) Build cumulata c executable
+#  6) Copy executable file in /bin
+#  7) Change directory to /development/c/minutes
+#  8) Build minutes c executable
+#  9) Change directory to development/c/jpeg812_src/
+# 10) and build libjpeg812
+# 11) Copy libjpeg812.so to /lib
 
+RUN cd /development/c/navig && \
+      make && \
+      cp /development/c/navig/navig /bin && \
+      cd /development/c/cumulata && \
+      make && \
+      cp /development/c/cumulata/cumulata /bin && \
+      cd /development/c/minutes && \
+      make && \
+      cp /development/c/minutes/minutes /bin && \
+      cd /development/c/jpeg812_src && \
+      make && \
+      cp /development/c/jpeg812_src/libjpeg812.so /lib
+      
 # Copy executable file in /bin
-RUN cp /development/c/navig/navig /bin
+# RUN cp /development/c/navig/navig /bin
 
 # Change directory to /development/c/cumulata
 # Build cumulata c executable
-RUN cd /development/c/cumulata && make
+# RUN cd /development/c/cumulata && make
 
 # Copy executable file in /bin
-RUN cp /development/c/cumulata/cumulata /bin
+# RUN cp /development/c/cumulata/cumulata /bin
 
 # Change directory to /development/c/minutes
 # Build minutes c executable
-RUN cd /development/c/minutes && make
+# RUN cd /development/c/minutes && make
 
 # Copy executable file in /bin
-RUN cp /development/c/minutes/minutes /bin
+# RUN cp /development/c/minutes/minutes /bin
 
 # Change directory to development/c/jpeg812_src/
 # and build libjpeg812
-RUN cd /development/c/jpeg812_src && make
+# RUN cd /development/c/jpeg812_src && make
 
 # Copy libjpeg812.so to /lib
-RUN cp /development/c/jpeg812_src/libjpeg812.so /lib
+# RUN cp /development/c/jpeg812_src/libjpeg812.so /lib
 
 # Copy libwvt.so to /lib
-COPY ./dev/c/decompr_64/libwvt.so /lib
+COPY ./development/c/decompr_64/libwvt.so /lib
 
 # Change directory to /development/c/xrit2pic/sgtk/sgtk_src and make
-RUN cd /development/c/xrit2pic/sgtk/sgtk_src && make 
+# RUN cd /development/c/xrit2pic/sgtk/sgtk_src && make 
 
-# Copy /development/c/msg/xrit-0.2.5/bin/put_xrit_segments_together.pl, 
-# /development/c/msg/bin/read_seviri_prologue,
-# /development/c/msg/bin/read_xrit_header,
-# /development/c/msg/bin/xrit2raw            to /bin
-RUN cp /development/c/msg/xrit-0.2.5/bin/put_xrit_segments_together.pl /bin \
+# 1) Change directory to /development/c/xrit2pic/sgtk/sgtk_src and make
+# 2) Copy /development/c/msg/xrit-0.2.5/bin/put_xrit_segments_together.pl, 
+#    /development/c/msg/bin/read_seviri_prologue,
+#    /development/c/msg/bin/read_xrit_header,
+#    /development/c/msg/bin/xrit2raw            to /bin
+# 3) Copy /development/c/msg/xrit-0.2.5/lib/libxrit.a to /lib
+# 4) Setup linker path
+# 5) Change directory to /development/c/xrit2pic/xrit/main_src and make
+# 6) Copy /development/c/xrit2pic/xrit/main_src/xrit2pic to /bin
+# 7) Change directory to /development/c/msg/xrit-0.2.5 && make clean && make
+RUN cd /development/c/xrit2pic/sgtk/sgtk_src \
+      && make \
+      && cp /development/c/msg/xrit-0.2.5/bin/put_xrit_segments_together.pl /bin \
       && cp /development/c/msg/xrit-0.2.5/bin/read_seviri_prologue /bin \
       && cp /development/c/msg/xrit-0.2.5/bin/read_xrit_header /bin \
-      && cp /development/c/msg/xrit-0.2.5/bin/xrit2raw /bin
+      && cp /development/c/msg/xrit-0.2.5/bin/xrit2raw /bin \
+      && cp /development/c/msg/xrit-0.2.5/lib/libxrit.a /lib \
+      && touch /etc/ld.so.conf.d/xrit2piclibs.conf \
+      && echo "/lib" > /etc/ld.so.conf.d/xrit2pic.conf \
+      && ldconfig \
+      && cd /development/c/xrit2pic/xrit/main_src \
+      && make \
+      && cp /development/c/xrit2pic/xrit/main_src/xrit2pic /bin \
+      && cd /development/c/msg/xrit-0.2.5 && make clean \
+      && make
 
 # Copy /development/c/msg/xrit-0.2.5/lib/libxrit.a to /lib
-RUN cp /development/c/msg/xrit-0.2.5/lib/libxrit.a /lib
+# RUN cp /development/c/msg/xrit-0.2.5/lib/libxrit.a /lib
 
 # Setup linker path
-RUN touch /etc/ld.so.conf.d/xrit2piclibs.conf && echo "/lib" > /etc/ld.so.conf.d/xrit2pic.conf && ldconfig
+# RUN touch /etc/ld.so.conf.d/xrit2piclibs.conf && echo "/lib" > /etc/ld.so.conf.d/xrit2pic.conf && ldconfig
 
 # Change directory to /development/c/xrit2pic/xrit/main_src and make
-RUN cd /development/c/xrit2pic/xrit/main_src && make 
+# RUN cd /development/c/xrit2pic/xrit/main_src && make 
 
 # Copy /development/c/xrit2pic/xrit/main_src/xrit2pic to /bin
-RUN cp /development/c/xrit2pic/xrit/main_src/xrit2pic /bin
+# RUN cp /development/c/xrit2pic/xrit/main_src/xrit2pic /bin
 
 # Change directory to /development/c/msg/xrit-0.2.5 && make clean && make
-RUN cd /development/c/msg/xrit-0.2.5 && make clean && make
+# RUN cd /development/c/msg/xrit-0.2.5 && make clean && make
 
 #RUN /bin/navig
 #RUN /bin/cumulata

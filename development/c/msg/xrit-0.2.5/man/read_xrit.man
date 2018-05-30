@@ -1,0 +1,122 @@
+.TH LIBXRIT 1
+.SH NAME
+libxrit \- free routines (in C) to read the \fBXRIT\fP file format
+.SH DOWNLOAD
+http://www-loa.univ-lille1.fr/~ducos/public/xrit/xrit-0.2.4.tar.gz
+.SH RELATED PAGES
+http://www-loa.univ-lille1.fr/~ducos/public/xrit/xrit2raw.html
+
+http://www-loa.univ-lille1.fr/~ducos/public/xrit/put_xrit_segments_together.html
+
+.SH SYNOPSIS
+.B #include \(lqread_xrit.h\(rq
+
+.B void xrit_orientation(int \fIorientation\fP)
+
+.B int read_xrit(const char *\fIfilename\fP, uint16_t *\fIcounts\fP, int *\fIisegment\fP,
+xrit_header_t **\fIxrit_header\fP, xrit_rows_infos_t *\fIrows_infos\fP, 
+MSG_Prologue *\fIprologue\fP, MSG_Epilogue *\fIepilogue\fP)
+
+.B void free_xrit_header(xrit_header_t *\fIxrit_header\fP)
+
+.B void print_xrit_header(xrit_header_t *\fIxrit_header\fP)
+
+.SH DESCRIPTION
+.PP
+.TP
+.B void xrit_orientation(int \fIorientation\fP)
+.PP
+This function should be called BEFORE any call to the \fBread_xrit\fP routine.
+It sets the orientation of the image which will be loaded by \fBread_xrit\fP.
+.PP
+\fIorientation\fP may be given the values :
+\fBXRIT_NORTH_AT_TOP\fP, \fBXRIT_SOUTH_AT_TOP\fP
+.PP
+The default is \fBXRIT_SOUTH_AT_TOP\fP (for this is the original
+orientation of the data, it means that the southern data are the first ones in
+memory, since they were acquired at first)
+
+.PP
+.TP
+.B int read_xrit(const char *\fIfilename\fP, uint16_t *\fIcounts\fP, int *\fIisegment\fP,
+xrit_header_t **\fIxrit_header\fP, xrit_rows_infos_t *\fIrows_infos\fP, 
+MSG_Prologue *\fIprologue\fP, MSG_Epilogue *\fIepilogue\fP)
+.PP
+This function loads the \fIfilename\fP's content into the \fIcounts\fP buffer. The
+file is expected to be an \fBMSG/SEVIRI XRIT\fP radiances file (the counts are 16-bit unsigned
+integral values in linear relationship with radiances, the conversion coefficients may be
+retrieved from the \fIprologue\fP)
+.PP
+\fIfilename\fP: the name of the \fBXRIT\fP file to read
+
+\fIcounts\fP: the buffer to be filled by the routine. Must be allocated by the caller
+(with \fBXRIT_NROWS\fP*\fBXRIT_NCOLUMNS\fP elements of type \fBuint16_t\fP)
+
+\fIisegment\fP: a pointer to an \fBint\fP that will be filled with the index of segment to extract
+(between 1 and 8). To extract all the segments, set *isegment to \fB0\fP or isegment to \fBNULL\fP.
+
+\fIxrit_header\fP: a linked list containing the headers for each segment. Allocated by
+\fBread_xrit\fP (give only the address of a pointer of type \fBxrit_header_t *\fP, or \fBNULL\fP
+to ignore this parameter). These headers may be displayed with \fBprint_xrit_header\fP.
+
+\fIrows_infos\fP: a structure that contains time and validity infos for each row of data. Must be
+allocated by the caller (or set to \fBNULL\fP to ignore it). The \fBxrit_rows_infos_t\fP structure
+is defined in the \fBread_xrit.h\fP file.
+
+\fIprologue\fP: a pointer to an \fBMSG_Prologue\fP structure, that must be allocated by the caller or set
+to \fBNULL\fP. The structure will be filled by the routine if the pointer is not \fBNULL\fP.
+
+\fIepilogue\fP: a pointer to an \fBMSG_Epilogue\fP structure, that must be allocated by the caller or set
+to \fBNULL\fP. The structure will be filled by the routine if the pointer is not \fBNULL\fP
+(currently not implemented because of lack of free and easily reachable documentation about XRIT MSG data, so use \fBNULL\fP for the time being).
+
+.PP
+.TP
+.B void free_xrit_header(xrit_header_t *\fIxrit_header\fP)
+.PP
+frees any \fIxrit_header\fP linked list allocated and filled by \fBread_xrit\fP
+
+.PP
+.TP
+.B void print_xrit_header(xrit_header_t *\fIxrit_header\fP)
+.PP
+a debugging purpose function that prints infos about headers found in an \fBXRIT\fP file. Must be
+given an \fIxrit_header\fP returned by \fBread_xrit\fP
+
+.SH RETURN VALUES
+.PP
+.TP
+.B \fBread_xrit\fP     
+the number of processed segments on success (should be 8 for an entire 8-segments image), -1 on failure
+
+.SH COPYRIGHT
+libxrit is Copyright (c) LOA/ICARE 2006-2010
+.PP
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+.SH BUGS
+.PP
+The \fBMSG_Epilogue\fP structure is not implemented yet (due to the difficulty to find free documentation on the structure, anyone
+who can send it to me will be welcome). 
+.PP
+The \fIepilogue\fP argument in \fBread_xrit\fP must be given a \fBNULL\fP value.
+.PP
+The \fIradiometric_validity\fP and \fIgeometric_validity\fP fields in the \fBxrit_rows_infos_t\fP structure
+are not reliable (at the time of this writing). It seems they are not always correctly recorded in the \fBXRIT\fP files.
+.PP
+Please report any bug you could find to fabrice.ducos@univ-lille1.fr
+.SH AUTHORS
+Fabrice Ducos
+.SH SEE ALSO
+xrit2raw ( http://www-loa.univ-lille1.fr/~ducos/public/xrit/xrit2raw.html )
